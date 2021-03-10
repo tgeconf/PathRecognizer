@@ -20,34 +20,19 @@ export default class Tool {
     getScrollY() {
         return window.scrollY;
     }
+
+    drawConnectedPoint(ctx, from, to) {
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    round(n, d) {
+        d = Math.pow(10, d);
+        return Math.round(n * d) / d;
+    }
 }
 
 export const tool = new Tool();
-// export const printMe = () => {
-//     console.log('Updating printsdsasdadsa');
-// }
-
-// export const getCanvasRect = (canvas) => {
-//     console.log('fuck')
-//         // var w = canvas.width;
-//         // var h = canvas.height;
-
-//     // var cx = canvas.offsetLeft;
-//     // var cy = canvas.offsetTop;
-//     // while (canvas.offsetParent != null) {
-//     //     canvas = canvas.offsetParent;
-//     //     cx += canvas.offsetLeft;
-//     //     cy += canvas.offsetTop;
-//     // }
-//     // return { x: cx, y: cy, width: w, height: h };
-// }
-
-// function getScrollX() {
-//     var scrollX = $(window).scrollLeft();
-//     return scrollX;
-// }
-
-// function getScrollY() {
-//     var scrollY = $(window).scrollTop();
-//     return scrollY;
-// }
