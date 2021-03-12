@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import printMe from './print.js';
 import { tool } from './tool.js';
-import { pathRecognizer, Point, Rectangle, UniStroke } from '../lib/index.js';
+import { anglePathRecognizer, Point, Rectangle, UniStroke } from './angleRecognizer/index.js';
+// import { pathRecognizer, Point, Rectangle, UniStroke } from '../lib/index.js';
 
 let canvas, ctx, canvasRect, isDown = false,
     tracePoints = [];
@@ -40,8 +40,13 @@ const mouseUp = (e) => {
         button = e.button;
     if (isDown || button == 2) {
         isDown = false;
-        let result = pathRecognizer.recognize(tracePoints, true);
-        document.getElementById('resultSpan').innerHTML = "Result: " + result.Name + " (" + tool.round(result.Score, 2) + ") in " + result.Time + " ms.";
+        let result = anglePathRecognizer.recognize(tracePoints, true);
+        let str = '';
+        result[1].forEach((r, i) => {
+                str += "Result: " + (r.Name === result[0] ? '<b>' + r.Name + '</b>' : r.Name) + " (" + tool.round(r.Score, 2) + ") in " + r.Time + " ms" + (i === 5 || i === 9 ? anglePathRecognizer.gestures[i].cosFeature.join(',') : '') + ".<br>";
+            })
+            // document.getElementById('resultSpan').innerHTML = "Result: " + result.Name + " (" + tool.round(result.Score, 2) + ") in " + result.Time + " ms.";
+        document.getElementById('resultSpan').innerHTML = str;
     }
 }
 

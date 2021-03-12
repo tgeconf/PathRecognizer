@@ -6,7 +6,9 @@ export default class UniStroke {
         this.NumPoints = 64;
         // this.origin = new Point(0, 0);
         this.Name = name;
+        // this.points = points;
         this.points = this.resample(points, this.NumPoints);
+        this.cosFeature = this.calCosFeature();
         // let radians = this.indicativeAngle(this.points);
         // let squareSize = tool.SquareSize;
         // this.points = tool.rotateBy(this.points, -radians);
@@ -37,8 +39,18 @@ export default class UniStroke {
         return newpoints;
     }
 
-    indicativeAngle(points) {
-        let c = tool.centroid(points);
-        return Math.atan2(c.y - points[0].y, c.x - points[0].x);
+    calCosFeature() {
+        // console.log('input points: ', this.points.length, this.points);
+        const resultVec = [];
+        for (let i = 1, len = this.points.length; i < len - 1; i++) {
+            const vec1x = this.points[i - 1].x - this.points[i].x;
+            const vec1y = this.points[i - 1].y - this.points[i].y;
+            const vec2x = this.points[i + 1].x - this.points[i].x;
+            const vec2y = this.points[i + 1].y - this.points[i].y;
+            const cos = (vec1x * vec2x + vec1y * vec2y) / (tool.distanceTo(this.points[i - 1], this.points[i]) * tool.distanceTo(this.points[i + 1], this.points[i]));
+            // console.log(i, 'cos: ', cos, tool.distanceTo(this.points[i - 1], this.points[i]), tool.distanceTo(this.points[i + 1], this.points[i]));
+            resultVec.push(cos);
+        }
+        return resultVec;
     }
 }
