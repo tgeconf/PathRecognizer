@@ -42,7 +42,7 @@ module.exports = {
         // new CleanWebpackPlugin(['dist/*']) for < v2 versions of CleanWebpackPlugin
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            title: 'Hot Module Replacement',
+            title: 'Path Recognizer',
         }),
     ],
     output: {

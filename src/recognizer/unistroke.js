@@ -4,15 +4,15 @@ import { tool } from './tool';
 export default class UniStroke {
     constructor(name, points) {
         this.NumPoints = 64;
-        // this.origin = new Point(0, 0);
+        this.origin = new Point(0, 0);
         this.Name = name;
         this.points = this.resample(points, this.NumPoints);
-        // let radians = this.indicativeAngle(this.points);
-        // let squareSize = tool.SquareSize;
-        // this.points = tool.rotateBy(this.points, -radians);
-        // this.points = tool.scaleTo(this.points, squareSize);
-        // this.points = tool.translateTo(this.points, this.origin);
-        // this.Vector = tool.vectorize(this.points); // for Protractor
+        let radians = this.indicativeAngle(this.points);
+        let squareSize = tool.SquareSize;
+        this.points = tool.rotateBy(this.points, -radians);
+        this.points = tool.scaleTo(this.points, squareSize);
+        this.points = tool.translateTo(this.points, this.origin);
+        this.Vector = tool.vectorize(this.points); // for Protractor
     }
 
     resample(points, n) {
