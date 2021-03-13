@@ -4,32 +4,32 @@ import { pathRecognizer, Point, Rectangle, UniStroke } from './recognizer/index.
 // import { pathRecognizer, Point, Rectangle, UniStroke } from '../lib/index.js';
 
 let canvas, ctx, canvasRect, isDown = false,
-    tracePoints = [];
+    tracePoints = [],
+    pathInterval, recordingPath = false,
+    timeDelimiter = 1000;
 
 const clearCanvas = () => {
     ctx.clearRect(0, 0, canvasRect.width, canvasRect.height);
     tracePoints = [];
 }
 
-const mouseDown = (e) => {
+const downEvent = (e) => {
     let x = e.clientX,
-        y = e.clientY,
-        button = e.button;
-    if (button <= 1) {
-        isDown = true;
-        x -= canvasRect.x - tool.getScrollX();
-        y -= canvasRect.y - tool.getScrollY();
-        // if (tracePoints.length > 0) {
-        //     ctx.clearRect(0, 0, canvasRect.width, canvasRect.height);
-        // }
-        // tracePoints.length = 1; // clear
-        // tracePoints[0] = new Point(x, y);
-        tracePoints.push(new Point(x, y));
-        ctx.fillRect(x - 4, y - 3, 9, 9);
+        y = e.clientY;
+    // button = e.button;
+    isDown = true;
+    x -= canvasRect.x - tool.getScrollX();
+    y -= canvasRect.y - tool.getScrollY();
+    tracePoints.push(new Point(x, y));
+    ctx.fillRect(x - 4, y - 3, 9, 9);
+    if (!recordingPath) {
+        recordingPath = true;
+    } else {
+        clearInterval(pathInterval);
     }
 }
 
-const mouseMove = (e) => {
+const moveEvent = (e) => {
     let x = e.clientX,
         y = e.clientY;
     if (isDown) {
@@ -40,20 +40,20 @@ const mouseMove = (e) => {
     }
 }
 
-const mouseUp = (e) => {
-    let x = e.clientX,
-        y = e.clientY,
-        button = e.button;
-    if (isDown || button == 2) {
+const upEvent = (e) => {
+    if (isDown) {
         isDown = false;
-        // recognizePath();
-        // let result = pathRecognizer.recognize(tracePoints, true);
-        // let str = '';
-        // result[1].forEach((r, i) => {
-        //         str += "Result: " + (r.Name === result[0] ? '<b>' + r.Name + '</b>' : r.Name) + " (" + tool.round(r.Score, 2) + ") in " + r.Time + " ms" + (i === 5 || i === 9 ? anglePathRecognizer.gestures[i].cosFeature.join(',') : '') + ".<br>";
-        //     })
-        // document.getElementById('resultSpan').innerHTML = "Result: " + result.Name + " (" + tool.round(result.Score, 2) + ") in " + result.Time + " ms.";
-        // document.getElementById('resultSpan').innerHTML = str;
+        if (recordingPath) {
+            let tmpTime = timeDelimiter;
+            pathInterval = setInterval(() => {
+                tmpTime -= 100;
+                if (tmpTime === 0) {
+                    recordingPath = false;
+                    clearInterval(pathInterval);
+                    recognizePath();
+                }
+            }, 100)
+        }
     }
 }
 
@@ -70,11 +70,76 @@ canvas.height = 600;
 canvas.style.backgroundColor = '#eee';
 document.body.appendChild(canvas);
 ctx = canvas.getContext('2d');
-canvas.onmousedown = mouseDown;
-canvas.onmousemove = mouseMove;
-canvas.onmouseup = mouseUp;
-
 canvasRect = tool.getCanvasRect(canvas);
+
+
+// // Mouse
+canvas.addEventListener('mousedown', function(e) {
+    downEvent(e);
+    e.preventDefault();
+}, false)
+canvas.addEventListener('mousemove', function(e) {
+    moveEvent(e);
+    e.preventDefault();
+}, false)
+canvas.addEventListener('mouseup', function(e) {
+    upEvent(e);
+    e.preventDefault();
+}, false)
+
+// // Touch
+canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+}, false)
+canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+}, false)
+canvas.addEventListener('touchend', function(e) {
+    e.preventDefault();
+}, false)
+
+// Pointer
+// canvas.addEventListener('pointerover', (e) => {
+//     alert('pointer over');
+// })
+canvas.addEventListener('pointerdown', function(e) {
+    switch (e.pointerType) {
+        case 'pen':
+        case 'mouse':
+            downEvent(e);
+            break;
+        case 'touch':
+            console.log('touch pointer down');
+            break;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+}, false)
+canvas.addEventListener('pointermove', function(e) {
+    switch (e.pointerType) {
+        case 'pen':
+        case 'mouse':
+            moveEvent(e);
+            break;
+        case 'touch':
+            console.log('touch pointer move');
+            break;
+    }
+}, false)
+canvas.addEventListener('pointerup', function(e) {
+    switch (e.pointerType) {
+        case 'pen':
+        case 'mouse':
+            upEvent(e);
+            break;
+        case 'touch':
+            console.log('touch pointer up');
+            break;
+    }
+}, false)
+
+
 
 const resultSpan = document.createElement('span');
 resultSpan.id = 'resultSpan';
@@ -121,6 +186,13 @@ clearBtn.onclick = () => {
 }
 document.body.appendChild(clearBtn);
 
+
+// window.onpointerdown = (e) => {
+//     e.preventDefault();
+// }
+// window.onpointermove = (e) => {
+//     e.preventDefault();
+// }
 
 // if (module.hot) {
 //     module.hot.accept('./tool.js', function() {
