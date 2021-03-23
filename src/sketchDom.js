@@ -38,14 +38,17 @@ export default class SketchDom {
         this.canvas.width = this.width;
         this.canvas.height = this.height;
         this.canvas.style.position = 'absolute';
+        this.canvas.style.backgroundColor = 'rgba(200, 200, 200, 0.5)';
         this.container.appendChild(this.canvas);
         this.ctx = this.canvas.getContext('2d');
         this.canvasRect = this.getCanvasRect(this.canvas);
         console.log('canvas rect: ', this.canvasRect);
+        this.hideCanvas();
 
         //Mouse
         const that = this;
-        this.canvas.addEventListener('mousedown', (e) => {
+        this.container.addEventListener('mousedown', (e) => {
+            that.showCanvas();
             that.downEvent(e);
             e.preventDefault();
         }, false)
@@ -59,7 +62,7 @@ export default class SketchDom {
         }, false)
 
         //Touch
-        this.canvas.addEventListener('touchstart', (e) => {
+        this.container.addEventListener('touchstart', (e) => {
             e.preventDefault();
         }, false)
         this.canvas.addEventListener('touchmove', (e) => {
@@ -73,7 +76,7 @@ export default class SketchDom {
         // canvas.addEventListener('pointerover', (e) => {
         //     alert('pointer over');
         // })
-        this.canvas.addEventListener('pointerdown', (e) => {
+        this.container.addEventListener('pointerdown', (e) => {
             switch (e.pointerType) {
                 case 'pen':
                 case 'mouse':
@@ -111,12 +114,23 @@ export default class SketchDom {
         }, false)
     }
 
+    hideCanvas() {
+        this.canvas.style.display = 'none';
+    }
+
+    showCanvas() {
+        this.canvas.style.display = '';
+    }
+
     /**
      * append dom in the container 
      * @param {*} dom : target dom
      */
-    appendDom(dom) {
+    appendDomUnderCanvas(dom) {
         this.container.insertBefore(dom, this.canvas);
+    }
+    appendDomOverCanvas(dom) {
+        this.container.appendChild(dom);
     }
 
     clearCanvas() {
@@ -145,6 +159,7 @@ export default class SketchDom {
     }
 
     downEvent(e) {
+        this.showCanvas();
         let x = e.clientX,
             y = e.clientY;
         this.isDown = true;
@@ -173,6 +188,7 @@ export default class SketchDom {
 
     upEvent(e) {
         if (this.isDown) {
+            this.hideCanvas();
             this.isDown = false;
             this.tracePoints.push(this.tracePointsOneStroke);
             if (this.recordingPath) {
